@@ -21,6 +21,8 @@
 
 mapping rule are json file (example are in mapping.json file) that specifies the output format. It takes a json of array of column information objects. Where the column information objects is the column definition that needs properties of colname (the column name) and source: an array of source column. If you specify the colname as newcol and source as `["col1", "col2"]` this means that the mapping are defined `col1 -> newcol`, and if there is no col1 - `col2 -> newcol`
 
+You can also use js to populate the value of the column. Any source with ! at the start will be treated as script, and columns are stored at rowres variable, so a source with value `!rowres['amount']>0?'positive':'negative'` will evaluate the js after !. This also can be used to concat few rows into one new column (for pk in merging). Please note that order matter, a column can only access values the column before it.
+
 #### merge
 
 `node index.js merge <sourcefolder> <resultfile>`
