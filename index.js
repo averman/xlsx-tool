@@ -29,7 +29,56 @@ yargs(hideBin(process.argv)).option('filter', {
 }, (argv)=>{
     let rule = JSON.parse(fs.readFileSync(argv.mappingfile).toString());
     extract(argv.source, argv.target, rule, argv.filter, argv.sheetname);
+}).command('merge [source] [target]', 
+'merge xlsx files from source folder to target file', (yargs)=>{
+    yargs.positional('source', {
+        describe: 'source folder',
+        default: '.'
+    });
+    yargs.positional('target', {
+        describe: 'target file',
+        default: 'target.xlsx'
+    });
+}, (argv)=>{
+    merge(argv.source, argv.target, argv.filter, argv.sheetname);
 }).argv
+
+function merge(source, target, filterstring, sheetname) {
+    console.log("merging from",source,"to",target);
+    let files = fs.readdirSync(source);
+    let filterRegex = filterstring? new RegExp(filterstring): undefined;
+    let filter = filterRegex? x=>filterRegex.test(x) : x=>true;
+    let resBook = XLSX.utils.book_new();
+    let resSheets = {};
+    for(let filename of files){
+        if(fs.lstatSync(path.join(source,filename)).isDirectory() ) continue;
+        if(!filename.endsWith(".xlsx")) continue;
+        if(!filter(filename)) continue;
+        console.log("Reading from", filename);
+        let workbook = XLSX.readFile(path.join(source,filename));
+        if(sheetname && workbook.SheetNames.indexOf(sheetname)==-1){
+            console.error("sheet",sheetname,"does not found in file",filename);
+            continue;
+        }
+        let sheets = sheetname? [sheetname] : workbook.SheetNames;
+        console.log("sheets to be merged",sheets); 
+        for(let activeSheet of sheets) {
+            let worksheet = workbook.Sheets[activeSheet];
+            let data = XLSX.utils.sheet_to_json(worksheet);
+            if(resSheets[activeSheet]){
+                resSheets[activeSheet] = resSheets[activeSheet].concat(data);
+            }else{
+                resSheets[activeSheet] = data;
+            }
+        }
+    }
+    for(let sn of Object.keys(resSheets)) {
+        let tempSheet = XLSX.utils.json_to_sheet(resSheets[sn]);
+        XLSX.utils.book_append_sheet(resBook, tempSheet, sn);
+    }
+    XLSX.writeFile(resBook, target);
+
+}
 
 function extract(source, target, rule, filterstring, sheetname) {
     console.log("extracting from",source,"to",target);
@@ -37,11 +86,11 @@ function extract(source, target, rule, filterstring, sheetname) {
     let filterRegex = filterstring? new RegExp(filterstring): undefined;
     let filter = filterRegex? x=>filterRegex.test(x) : x=>true;
     for(let filename of files){
-        if(fs.lstatSync(filename).isDirectory() ) continue;
+        if(fs.lstatSync(path.join(source,filename)).isDirectory() ) continue;
         if(!filename.endsWith(".xlsx")) continue;
         if(!filter(filename)) continue;
         console.log("Extracting from", filename);
-        let workbook = XLSX.readFile(filename);
+        let workbook = XLSX.readFile(path.join(source,filename));
         if(sheetname && workbook.SheetNames.indexOf(sheetname)==-1){
             console.error("sheet",sheetname,"does not found in file",filename);
             continue;
