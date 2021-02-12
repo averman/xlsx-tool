@@ -19,5 +19,11 @@
             "Amount From Provider (Contract Currency)",
             "Total Fare"
         ]
+    },
+    {
+        "colname": "combined column",
+        "source": [
+            "!rowres['entity']+'-'+rowres['amount']"
+        ]
     }
 ]

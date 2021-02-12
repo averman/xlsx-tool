@@ -123,7 +123,11 @@ function extract(source, target, rule, filterstring, sheetname) {
                 let rowres = {};
                 for(let colRule of rule){
                     for(let colMap of colRule.source) {
-                        if(row[colMap]) {
+                        if(colMap.startsWith("!")) {
+                            let scr = colMap.substr(1);
+                            rowres[colRule.colname] = eval(scr);
+                        }
+                        else if(row[colMap]) {
                             rowres[colRule.colname] = row[colMap];
                             break;
                         }
