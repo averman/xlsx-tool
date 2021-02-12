@@ -27,6 +27,8 @@ mapping rule are json file (example are in mapping.json file) that specifies the
 
 merge all xlsx file in source folder to result file
 
+use --pk to define the primary key (unique row identifier) so that row with same value in that column will be merged as one, not defining the pk will make merge command only append rows
+
 ### options:
 
 #### filter
