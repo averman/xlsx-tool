@@ -1,0 +1,23 @@
+[
+    {
+        "colname": "id",
+        "source": [
+            "Reschedule ID",
+            "Booking Id"
+        ]
+    },
+    {
+        "colname": "entity",
+        "source": [
+            "Contract Entity",
+            "Entity"
+        ]
+    },
+    {
+        "colname": "amount",
+        "source": [
+            "Amount From Provider (Contract Currency)",
+            "Total Fare"
+        ]
+    }
+]

@@ -1,0 +1,15 @@
+{
+  "name": "xlsx_tool",
+  "version": "1.0.0",
+  "description": "tool for multiple xlsx manipulation",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"no test\""
+  },
+  "author": "Averman",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "xlsx": "^0.16.9",
+    "yargs": "^16.2.0"
+  }
+}
