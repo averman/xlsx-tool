@@ -12,6 +12,9 @@ yargs(hideBin(process.argv)).option('filter', {
     alias: 's',
     type: 'string',
     description: 'the name of the sheet to be processed'
+}).option('pk', {
+    description: 'primary key for merge',
+    type: 'string',
 }).command('extract [source] [target] [mappingfile]', 
 'extract column(s) from source folder to target folder', (yargs)=>{
     yargs.positional('source', {
@@ -40,11 +43,11 @@ yargs(hideBin(process.argv)).option('filter', {
         default: 'target.xlsx'
     });
 }, (argv)=>{
-    merge(argv.source, argv.target, argv.filter, argv.sheetname);
+    merge(argv.source, argv.target, argv.filter, argv.sheetname, argv.pk);
 }).argv
 
-function merge(source, target, filterstring, sheetname) {
-    console.log("merging from",source,"to",target);
+function merge(source, target, filterstring, sheetname, pk) {
+    console.log("merging from",source,"to",target,"with pk",pk);
     let files = fs.readdirSync(source);
     let filterRegex = filterstring? new RegExp(filterstring): undefined;
     let filter = filterRegex? x=>filterRegex.test(x) : x=>true;
@@ -66,14 +69,29 @@ function merge(source, target, filterstring, sheetname) {
             let worksheet = workbook.Sheets[activeSheet];
             let data = XLSX.utils.sheet_to_json(worksheet);
             if(resSheets[activeSheet]){
-                resSheets[activeSheet] = resSheets[activeSheet].concat(data);
+                if(pk){
+                    for(let d of data){
+                        let pkval = d[pk];
+                        resSheets[activeSheet][pkval] = resSheets[activeSheet][pkval]?
+                        Object.assign(resSheets[activeSheet][pkval],d):d;
+                    }
+                }else
+                    resSheets[activeSheet] = resSheets[activeSheet].concat(data);
             }else{
-                resSheets[activeSheet] = data;
+                if(pk){
+                    resSheets[activeSheet] = {};
+                    for(let d of data){
+                        let pkval = d[pk];
+                        resSheets[activeSheet][pkval] = d;
+                    }
+                }else
+                    resSheets[activeSheet] = data;
             }
         }
     }
     for(let sn of Object.keys(resSheets)) {
-        let tempSheet = XLSX.utils.json_to_sheet(resSheets[sn]);
+        let tempData = pk?Object.values(resSheets[sn]):resSheets[sn]
+        let tempSheet = XLSX.utils.json_to_sheet(tempData);
         XLSX.utils.book_append_sheet(resBook, tempSheet, sn);
     }
     XLSX.writeFile(resBook, target);
