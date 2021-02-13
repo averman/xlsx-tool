@@ -138,7 +138,7 @@ function extract(source, target, rule, filterstring, sheetname) {
             let resBook = XLSX.utils.book_new();
             let resSheet = XLSX.utils.json_to_sheet(result);
             XLSX.utils.book_append_sheet(resBook, resSheet, 'result');
-            let sheetExtFn = sheets.length>1?'':activeSheet;
+            let sheetExtFn = sheets.length>1?activeSheet:'';
             XLSX.writeFile(resBook, path.join(target,filename.substr(0,filename.length-5)+sheetExtFn+".xlsx"));
         }
     }
