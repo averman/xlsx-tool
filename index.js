@@ -4,6 +4,15 @@ const fs = require('fs');
 const XLSX = require('xlsx');
 const path = require('path');
 
+function sum(...x) {
+    let res = 0;
+    for(let n of x) {
+        let m = new Number(n);
+        res+=Number.isNaN(m)?0:m;
+    }
+    return res;
+}
+
 yargs(hideBin(process.argv)).option('filter', {
     alias: 'f',
     type: 'regex',

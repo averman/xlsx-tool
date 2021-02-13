@@ -23,6 +23,8 @@ mapping rule are json file (example are in mapping.json file) that specifies the
 
 You can also use js to populate the value of the column. Any source with ! at the start will be treated as script, and columns are stored at rowres variable, so a source with value `!rowres['amount']>0?'positive':'negative'` will evaluate the js after !. This also can be used to concat few rows into one new column (for pk in merging). Please note that order matter, a column can only access values the column before it. You can use rowres variable for accessing the columns at the target, or row variable for accessing the columns at source
 
+you can take advantage of helper function sum to sum any number of variables and treat any undefined one as 0
+
 #### merge
 
 `node index.js merge <sourcefolder> <resultfile>`
