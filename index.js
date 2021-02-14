@@ -114,9 +114,12 @@ function merge(source, target, filterstring, sheetname, pk) {
                 }
             }
         }
+        console.log("converting merged data into a sheet");
         let tempSheet = XLSX.utils.json_to_sheet(tempData);
+        console.log("creating an xlsx based on the sheet");
         XLSX.utils.book_append_sheet(resBook, tempSheet, sn);
     }
+    console.log("writing to file");
     XLSX.writeFile(resBook, target);
 
 }
