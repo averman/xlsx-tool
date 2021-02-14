@@ -24,6 +24,9 @@ yargs(hideBin(process.argv)).option('filter', {
 }).option('pk', {
     description: 'primary key for merge',
     type: 'string',
+}).option('format', {
+    description: 'comma delimited list of column',
+    type: 'string',
 }).command('extract [source] [target] [mappingfile]', 
 'extract column(s) from source folder to target folder', (yargs)=>{
     yargs.positional('source', {
@@ -52,10 +55,10 @@ yargs(hideBin(process.argv)).option('filter', {
         default: 'target.xlsx'
     });
 }, (argv)=>{
-    merge(argv.source, argv.target, argv.filter, argv.sheetname, argv.pk);
+    merge(argv.source, argv.target, argv.filter, argv.sheetname, argv.pk, argv.format);
 }).argv
 
-function merge(source, target, filterstring, sheetname, pk) {
+function merge(source, target, filterstring, sheetname, pk, cols) {
     console.log("merging from",source,"to",target,"with pk",pk);
     let files = fs.readdirSync(source);
     let filterRegex = filterstring? new RegExp(filterstring): undefined;
@@ -114,10 +117,21 @@ function merge(source, target, filterstring, sheetname, pk) {
                 }
             }
         }
-        console.log("converting merged data into a sheet");
-        let tempSheet = XLSX.utils.json_to_sheet(tempData);
-        console.log("creating an xlsx based on the sheet");
-        XLSX.utils.book_append_sheet(resBook, tempSheet, sn);
+        if(cols){
+            let columns = cols.split(",");
+            for(let i=0; i<tempData.length; i++){
+                tempData[i]=columns.map(x=>tempData[i][x]);
+            }
+            console.log("converting merged data into a sheet");
+            let tempSheet = XLSX.utils.aoa_to_sheet(tempData);
+            console.log("creating an xlsx based on the sheet");
+            XLSX.utils.book_append_sheet(resBook, tempSheet, sn);
+        }else{
+            console.log("converting merged data into a sheet");
+            let tempSheet = XLSX.utils.json_to_sheet(tempData);
+            console.log("creating an xlsx based on the sheet");
+            XLSX.utils.book_append_sheet(resBook, tempSheet, sn);
+        }
     }
     console.log("writing to file");
     XLSX.writeFile(resBook, target);
