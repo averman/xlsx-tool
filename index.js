@@ -111,27 +111,35 @@ function merge(source, target, filterstring, sheetname, pk, cols) {
                 if(resSheets[sn][i]) continue;
                 tempData.push(resSheets[sn][keys[i]]);
                 let imark = (i*100)/keys.length;
-                if(imark - mark >= 1){
+                if(imark - mark >= 5){
                     mark = imark;
                     console.log("merging progress",imark,'%');
                 }
             }
         }
-        if(cols){
-            let columns = cols.split(",");
-            for(let i=0; i<tempData.length; i++){
-                tempData[i]=columns.map(x=>tempData[i][x]);
+        let columns;
+        if(!cols){
+            console.log("consolidating columns");
+            columns = {};
+            for(let r of tempData){
+                columns = Object.assign(columns,r);
             }
-            console.log("converting merged data into a sheet");
-            let tempSheet = XLSX.utils.aoa_to_sheet(tempData);
-            console.log("creating an xlsx based on the sheet");
-            XLSX.utils.book_append_sheet(resBook, tempSheet, sn);
-        }else{
-            console.log("converting merged data into a sheet");
-            let tempSheet = XLSX.utils.json_to_sheet(tempData);
-            console.log("creating an xlsx based on the sheet");
-            XLSX.utils.book_append_sheet(resBook, tempSheet, sn);
+            columns = Object.keys(columns);
         }
+        let aoa = [columns];
+        let mark = 0.0;
+        console.log("converting merged data into a sheet");
+        for(let i=0; i<tempData.length; i++){
+            aoa.push(columns.map(x=>tempData[i][x]));
+            let imark = (i*100)/tempData.length;
+            if(imark - mark >= 10){
+                mark = imark;
+                console.log("merging progress",imark,'%');
+            }
+        }
+        let tempSheet = XLSX.utils.aoa_to_sheet(aoa);
+        console.log("creating an xlsx based on the sheet");
+        XLSX.utils.book_append_sheet(resBook, tempSheet, sn);
     }
     console.log("writing to file");
     XLSX.writeFile(resBook, target);
