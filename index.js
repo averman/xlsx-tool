@@ -24,6 +24,9 @@ yargs(hideBin(process.argv)).option('filter', {
 }).option('pk', {
     description: 'primary key for merge',
     type: 'string',
+}).option('csv', {
+    description: 'set csv output',
+    type: 'flag',
 }).option('format', {
     description: 'comma delimited list of column',
     type: 'string',
@@ -55,11 +58,11 @@ yargs(hideBin(process.argv)).option('filter', {
         default: 'target.xlsx'
     });
 }, (argv)=>{
-    merge(argv.source, argv.target, argv.filter, argv.sheetname, argv.pk, argv.format);
+    merge(argv.source, argv.target, argv.filter, argv.sheetname, argv.pk, argv.format, argv.csv);
 }).argv
 
-function merge(source, target, filterstring, sheetname, pk, cols) {
-    console.log("merging from",source,"to",target,"with pk",pk);
+function merge(source, target, filterstring, sheetname, pk, cols, csv) {
+    console.log("merging from",source,"to",target,"with pk",pk,csv?"to csv format":"");
     let files = fs.readdirSync(source);
     let filterRegex = filterstring? new RegExp(filterstring): undefined;
     let filter = filterRegex? x=>filterRegex.test(x) : x=>true;
@@ -139,12 +142,20 @@ function merge(source, target, filterstring, sheetname, pk, cols) {
                 console.log("merging progress",imark,'%');
             }
         }
-        let tempSheet = XLSX.utils.aoa_to_sheet(aoa);
-        console.log("creating an xlsx based on the sheet");
-        XLSX.utils.book_append_sheet(resBook, tempSheet, sn);
+        if(csv){
+            console.log("writing to csv");
+            let stringdata = aoa.map(x=>x.join(",")).join("\n");
+            fs.writeFileSync(target,stringdata);
+        }else{
+            let tempSheet = XLSX.utils.aoa_to_sheet(aoa);
+            console.log("creating an xlsx based on the sheet");
+            XLSX.utils.book_append_sheet(resBook, tempSheet, sn);
+        }
     }
-    console.log("writing to file");
-    XLSX.writeFile(resBook, target);
+    if(!csv){
+        console.log("writing to file");
+        XLSX.writeFile(resBook, target);
+    }
 
 }
 
