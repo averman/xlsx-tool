@@ -117,7 +117,7 @@ function merge(source, target, filterstring, sheetname, pk, cols) {
                 }
             }
         }
-        let columns = cols.split(",");
+        let columns;
         if(!cols){
             console.log("consolidating columns");
             columns = {};
@@ -125,6 +125,8 @@ function merge(source, target, filterstring, sheetname, pk, cols) {
                 columns = Object.assign(columns,r);
             }
             columns = Object.keys(columns);
+        }else {
+            columns = cols.split(",");
         }
         let aoa = [columns];
         let mark = 0.0;
