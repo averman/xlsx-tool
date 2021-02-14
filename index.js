@@ -117,7 +117,7 @@ function merge(source, target, filterstring, sheetname, pk, cols) {
                 }
             }
         }
-        let columns;
+        let columns = cols.split(",");
         if(!cols){
             console.log("consolidating columns");
             columns = {};
