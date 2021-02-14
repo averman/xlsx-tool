@@ -99,7 +99,21 @@ function merge(source, target, filterstring, sheetname, pk) {
         }
     }
     for(let sn of Object.keys(resSheets)) {
-        let tempData = pk?Object.values(resSheets[sn]):resSheets[sn]
+        let tempData = resSheets[sn]
+        if(pk) {
+            tempData = [];
+            let mark = 0.0;
+            let keys = Object.keys(resSheets[sn]);
+            for(let i=0; i<keys.length; i++){
+                if(resSheets[sn][i]) continue;
+                tempData.push(resSheets[sn][keys[i]]);
+                let imark = (i*100)/keys.length;
+                if(imark - mark >= 1){
+                    mark = imark;
+                    console.log("merging progress",imark,'%');
+                }
+            }
+        }
         let tempSheet = XLSX.utils.json_to_sheet(tempData);
         XLSX.utils.book_append_sheet(resBook, tempSheet, sn);
     }

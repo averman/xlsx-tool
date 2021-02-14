@@ -1,0 +1,74 @@
+[
+    {
+        "colname": "Trip Type",
+        "source": [
+            "Trip Type"
+        ]
+    },
+    {
+        "colname": "Booking ID",
+        "source": [
+            "Booking ID"
+        ]
+    },
+    {
+        "colname": "Gross Commission",
+        "source": [
+            "Gross Commision",
+            "Actual Gross Commission (Inventory Currency)",
+            "Gross Commission (Inventory Currency)",
+            " Gross Commission (Inventory Currency) "
+        ]
+    },
+    {
+        "colname": "Published Rate",
+        "source": [
+            "Publish Rate (Inventory Currency)",
+            " Publish Rate (Inventory Currency) "
+        ]
+    },
+    {
+        "colname": "Business Model",
+        "source": [
+            "Business Model"
+        ]
+    },
+    {
+        "colname": "Discount / Premium",
+        "source": [
+            "Discount/Premium",
+            "Discount/Premium (Collecting Currency)"
+        ]
+    },
+    {
+        "colname": "Unique Code",
+        "source": [
+            "Unique Code",
+            "Unique Code (Collecting Currency)"
+        ]
+    },
+    {
+        "colname": "Coupon Value",
+        "source": [
+            "Coupon Value (Collecting Currency)"
+        ]
+    },
+    {
+        "colname": "Point Redemption",
+        "source": [
+            "Poin Redemption"
+        ]
+    },
+    {
+        "colname": "Issued Date",
+        "source": [
+            "Booking Issue Date"
+        ]
+    },
+    {
+        "colname": "VAT OUT",
+        "source": [
+            "VAT OUT (Inventoy Currency)"
+        ]
+    }
+]
