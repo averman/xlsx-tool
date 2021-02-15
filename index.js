@@ -133,6 +133,7 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
     let files = fs.readdirSync(source);
     let filterRegex = filterstring? new RegExp(filterstring): undefined;
     let filter = filterRegex? x=>filterRegex.test(x) : x=>true;
+    let globalPart = 0;
     for(let filename of files){
         if(fs.lstatSync(path.join(source,filename)).isDirectory() ) continue;
         if(!filename.endsWith(".xlsx")) continue;
@@ -150,12 +151,14 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
             let data = XLSX.utils.sheet_to_json(worksheet);
             let bulk = [];
             let count = 1;
-            for(let r of data){
+            for(let i=0; i<data.length; i++){
+                let r = data[i];
                 bulk.push(rule.map(x=>r[x.colname]));
-                if(bulk.length>=1000 || count*1000+bulk.length == data.length){   
-                    console.log("uploading part "+count+"/"+Math.ceil(data.length/1000));
+                if(bulk.length>=10000 || i == data.length-1){   
+                    let part = globalPart+count;
+                    console.log("uploading part "+count+"/"+Math.ceil(data.length/10000)+" -- total-part "+part);
                     token = await checkToken(token);
-                    await fetch(url+'/'+execId+"/part/"+count, {
+                    await fetch(url+'/'+execId+"/part/"+part, {
                     method: 'PUT',
                     headers: {
                             'Accept': 'application/json',
@@ -166,9 +169,11 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
                     }).then(response => response.json())
                     .then(console.log);
                     bulk = [];
-                    count++;
+                    if(i<data.length-1)
+                        count++;
                 }
             }
+            globalPart = globalPart+count;
         }
     }
     console.log("committiong changes");
