@@ -170,18 +170,18 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
                 }
             }
         }
-        console.log("committiong changes");
-        await fetch(url+'/'+execId+"/commit", {
-            method: 'PUT',
-            headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'text/csv',
-                    'Authorization': 'Bearer '+token
-                }
-            }).then(response => response.json())
-            .then(console.log);
-        console.log("finished upload to domo dataset with id ",datasetid);
     }
+    console.log("committiong changes");
+    await fetch(url+'/'+execId+"/commit", {
+        method: 'PUT',
+        headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'text/csv',
+                'Authorization': 'Bearer '+token
+            }
+        }).then(response => response.json())
+        .then(console.log);
+    console.log("finished upload to domo dataset with id ",datasetid);
 }
 
 async function createDataset(name, rule, token){
