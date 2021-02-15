@@ -9,6 +9,7 @@
   "author": "Averman",
   "license": "GPL-3.0",
   "dependencies": {
+    "node-fetch": "^2.6.1",
     "xlsx": "^0.16.9",
     "yargs": "^16.2.0"
   }
