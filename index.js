@@ -166,6 +166,7 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
                 }
             }).then(response => response.json())
             .then(console.log);
+        console.log("finished upload to domo dataset with id ",datasetid);
     }
 }
 
