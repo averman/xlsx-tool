@@ -117,3 +117,4 @@ dist
 *.xlsx
 
 target
+*.key

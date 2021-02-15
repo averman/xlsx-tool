@@ -3,6 +3,9 @@ const { hideBin } = require('yargs/helpers');
 const fs = require('fs');
 const XLSX = require('xlsx');
 const path = require('path');
+const fetch = require('node-fetch');
+
+let expired = 0;
 
 function sum(...x) {
     let res = 0;
@@ -36,6 +39,9 @@ yargs(hideBin(process.argv)).option('filter', {
     alias: 'f',
     type: 'regex',
     description: 'regex (greplike) string to filter the input filename'
+}).option('datasetid', {
+    type: 'number',
+    description: 'the domo dataset id, empty to create one'
 }).option('sheetname', {
     alias: 's',
     type: 'string',
@@ -78,7 +84,146 @@ yargs(hideBin(process.argv)).option('filter', {
     });
 }, (argv)=>{
     merge(argv.source, argv.target, argv.filter, argv.sheetname, argv.pk, argv.format, argv.csv);
+}).command('upload [source] [name] [schema]', 
+'upload xlsx files from source folder to domo', (yargs)=>{
+    yargs.positional('source', {
+        describe: 'source directory'
+    });
+    yargs.positional('name', {
+        describe: 'dataset name'
+    });
+    yargs.positional('schema', {
+        describe: 'json rule table schema',
+        default: 'mapping.json'
+    });
+}, (argv)=>{
+    test(argv.source, argv.name, argv.schema, argv.datasetid, argv.filter, argv.sheetname);
 }).argv
+
+
+async function checkToken(token) {
+    if(expired-Date.now()<0){
+        console.log("getting new token for domo!",expired,Date.now(),expired-Date.now());
+        token = await getDomoToken();
+        expired = Date.now()- -(45*60*1000);
+        console.log("token will be refreshed at",new Date(expired));
+    }
+    return token;
+}
+
+async function test(source, name, rulefile, datasetid, filterstring, sheetname){
+    let rule = JSON.parse(fs.readFileSync(rulefile).toString());
+    let token = await checkToken();
+    console.log('Got DOMO token for 1 hour');
+    if(!datasetid) {
+        datasetid = await createDataset(name, rule, token);
+        console.log("your datasetid is",datasetid);
+    }
+    let url = 'https://api.domo.com/v1/streams/'+datasetid+'/executions';
+    let execId = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer '+token
+        }
+    }).then(response => response.json())
+    .then(json => json.id);
+    console.log("uploading from",source,"to",name);
+    let files = fs.readdirSync(source);
+    let filterRegex = filterstring? new RegExp(filterstring): undefined;
+    let filter = filterRegex? x=>filterRegex.test(x) : x=>true;
+    let globalPart = 0;
+    for(let filename of files){
+        if(fs.lstatSync(path.join(source,filename)).isDirectory() ) continue;
+        if(!filename.endsWith(".xlsx")) continue;
+        if(!filter(filename)) continue;
+        console.log("Reading from", filename);
+        let workbook = XLSX.readFile(path.join(source,filename));
+        if(sheetname && workbook.SheetNames.indexOf(sheetname)==-1){
+            console.error("sheet",sheetname,"does not found in file",filename);
+            continue;
+        }
+        let sheets = sheetname? [sheetname] : workbook.SheetNames;
+        console.log("sheets to be uploaded",sheets); 
+        for(let activeSheet of sheets) {
+            let worksheet = workbook.Sheets[activeSheet];
+            let data = XLSX.utils.sheet_to_json(worksheet);
+            let bulk = [];
+            let count = 1;
+            for(let i=0; i<data.length; i++){
+                let r = data[i];
+                bulk.push(rule.map(x=>r[x.colname]));
+                if(bulk.length>=10000 || i == data.length-1){   
+                    let part = globalPart+count;
+                    console.log("uploading part "+count+"/"+Math.ceil(data.length/10000)+" -- total-part "+part);
+                    token = await checkToken(token);
+                    await fetch(url+'/'+execId+"/part/"+part, {
+                    method: 'PUT',
+                    headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'text/csv',
+                            'Authorization': 'Bearer '+token
+                        },
+                    body: bulk.map(x=>x.join(',')).join('\n')
+                    }).then(response => response.json())
+                    .then(console.log);
+                    bulk = [];
+                    if(i<data.length-1)
+                        count++;
+                }
+            }
+            globalPart = globalPart+count;
+        }
+    }
+    console.log("committiong changes");
+    await fetch(url+'/'+execId+"/commit", {
+        method: 'PUT',
+        headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'text/csv',
+                'Authorization': 'Bearer '+token
+            }
+        }).then(response => response.json())
+        .then(console.log);
+    console.log("finished upload to domo dataset with id ",datasetid);
+}
+
+async function createDataset(name, rule, token){
+    let url = 'https://api.domo.com/v1/streams';
+    console.log('url is',url)
+    return await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer '+token
+        },
+        body: JSON.stringify({
+            "dataSet" : {
+              "name" : name,
+              "description" : "",
+              "schema" : {
+                "columns" : rule.map(x=>{return {type: x.type?x.type:"STRING", name: x.colname}})
+              }
+            },
+            "updateMethod" : "APPEND"
+          })
+    }).then(response => response.json())
+    .then(json => json.id);
+}
+
+async function getDomoToken(){
+    let url = 'https://api.domo.com/oauth/token?grant_type=client_credentials&scope=data';
+    let headers = new fetch.Headers();
+    let {username, password} = JSON.parse(fs.readFileSync("domo.key").toString());
+    headers.set('Authorization', 'Basic ' + Buffer.from((username + ":" + password)).toString('base64'));
+    return await fetch(url, {method:'GET',
+        headers: headers,
+       })
+    .then(response => response.json())
+    .then(json => json.access_token);
+}
 
 function merge(source, target, filterstring, sheetname, pk, cols, csv) {
     console.log("merging from",source,"to",target,"with pk",pk,csv?"to csv format":"");
