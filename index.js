@@ -139,7 +139,7 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
             let count = 1;
             for(let r of data){
                 bulk.push(rule.map(x=>r[x.colname]));
-                if(bulk.length>=100){   
+                if(bulk.length>=100 || count*100+bulk.length == data.length){   
                     console.log("uploading part "+count+"/"+Math.ceil(data.length/100));
                     await fetch(url+'/'+execId+"/part/"+count, {
                     method: 'PUT',
