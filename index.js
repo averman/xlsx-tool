@@ -5,6 +5,8 @@ const XLSX = require('xlsx');
 const path = require('path');
 const fetch = require('node-fetch');
 
+let expired = 0;
+
 function sum(...x) {
     let res = 0;
     for(let n of x) {
@@ -98,9 +100,20 @@ yargs(hideBin(process.argv)).option('filter', {
     test(argv.source, argv.name, argv.schema, argv.datasetid, argv.filter, argv.sheetname);
 }).argv
 
+
+async function checkToken(token) {
+    if(expired-Date.now()<0){
+        console.log("getting new token for domo!",expired,Date.now(),expired-Date.now());
+        token = await getDomoToken();
+        expired = Date.now()- -(45*60*1000);
+        console.log("token will be refreshed at",new Date(expired));
+    }
+    return token;
+}
+
 async function test(source, name, rulefile, datasetid, filterstring, sheetname){
     let rule = JSON.parse(fs.readFileSync(rulefile).toString());
-    let token = await getDomoToken();
+    let token = await checkToken();
     console.log('Got DOMO token for 1 hour');
     if(!datasetid) {
         datasetid = await createDataset(name, rule, token);
@@ -139,8 +152,9 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
             let count = 1;
             for(let r of data){
                 bulk.push(rule.map(x=>r[x.colname]));
-                if(bulk.length>=100 || count*100+bulk.length == data.length){   
-                    console.log("uploading part "+count+"/"+Math.ceil(data.length/100));
+                if(bulk.length>=1000 || count*1000+bulk.length == data.length){   
+                    console.log("uploading part "+count+"/"+Math.ceil(data.length/1000));
+                    token = await checkToken(token);
                     await fetch(url+'/'+execId+"/part/"+count, {
                     method: 'PUT',
                     headers: {
