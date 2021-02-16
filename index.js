@@ -158,16 +158,7 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
                     let part = globalPart+count;
                     console.log("uploading part "+count+"/"+Math.ceil(data.length/10000)+" -- total-part "+part);
                     token = await checkToken(token);
-                    await fetch(url+'/'+execId+"/part/"+part, {
-                    method: 'PUT',
-                    headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'text/csv',
-                            'Authorization': 'Bearer '+token
-                        },
-                    body: bulk.map(x=>x.join(',')).join('\n')
-                    }).then(response => response.json())
-                    .then(console.log);
+                    await putDataPart(url, execId, part, token, bulk);
                     bulk = [];
                     if(i<data.length-1)
                         count++;
@@ -198,10 +189,13 @@ async function putDataPart(url,execId, part,token,bulk) {
                 'Authorization': 'Bearer '+token
             },
         body: bulk.map(x=>x.join(',')).join('\n')
-        }).catch(err=>{
+        }).catch(async err=>{
             console.log(err);
-            putDataPart(url,execId, part,token,bulk);
-        }).then(response => response.json())
+            await putDataPart(url,execId, part,token,bulk);
+        }).then(response => response.json()).catch(async err=>{
+            console.log(err);
+            await putDataPart(url,execId, part,token,bulk);
+        })
         .then(console.log)
 }
 
