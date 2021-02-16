@@ -189,6 +189,22 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
     console.log("finished upload to domo dataset with id ",datasetid);
 }
 
+async function putDataPart(url,execId, part,token,bulk) {
+    await fetch(url+'/'+execId+"/part/"+part, {
+        method: 'PUT',
+        headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'text/csv',
+                'Authorization': 'Bearer '+token
+            },
+        body: bulk.map(x=>x.join(',')).join('\n')
+        }).catch(err=>{
+            console.log(err);
+            putDataPart(url,execId, part,token,bulk);
+        }).then(response => response.json())
+        .then(console.log)
+}
+
 async function createDataset(name, rule, token){
     let url = 'https://api.domo.com/v1/streams';
     console.log('url is',url)
