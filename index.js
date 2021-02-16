@@ -153,7 +153,7 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
             let count = 1;
             for(let i=0; i<data.length; i++){
                 let r = data[i];
-                bulk.push(rule.map(x=>r[x.colname]));
+                bulk.push(rule.map(x=>x.serialdate?serialDate(r[x.colname]).toLocaleDateString():r[x.colname]));
                 if(bulk.length>=10000 || i == data.length-1){   
                     let part = globalPart+count;
                     console.log("uploading part "+count+"/"+Math.ceil(data.length/10000)+" -- total-part "+part);
@@ -210,7 +210,7 @@ async function createDataset(name, rule, token){
             "updateMethod" : "APPEND"
           })
     }).then(response => response.json())
-    .then(json => json.id);
+    .then(json => {json.id});
 }
 
 async function getDomoToken(){
