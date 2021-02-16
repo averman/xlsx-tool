@@ -352,7 +352,7 @@ function extract(source, target, rule, filterstring, sheetname) {
                             let scr = colMap.substr(1);
                             rowres[colRule.colname] = eval(scr);
                         }
-                        else if(row[colMap]) {
+                        else if(typeof row[colMap] == "undefined") {
                             rowres[colRule.colname] = row[colMap];
                             break;
                         }
