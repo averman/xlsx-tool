@@ -1,0 +1,20 @@
+[
+    {
+        "colname": "Entity",
+        "source": [
+            "Entity"
+        ]
+    },
+    {
+        "colname": "Product",
+        "source": [
+            "Product Type"
+        ]
+    },
+    {
+        "colname": "Coupon",
+        "source": [
+            "Coupon Value"
+        ]
+    }
+]

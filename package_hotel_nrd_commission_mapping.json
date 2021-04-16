@@ -1,0 +1,33 @@
+[
+	{
+		"colname": "Booking ID",
+		"type": "LONG"
+	},
+	{
+		"colname": "Entity"
+	},
+	{
+		"colname": "Product Type"
+	},
+	{
+		"colname": "Provider Id"
+	},
+	{
+		"colname": "Contract Currency"
+	},
+	{
+		"colname": "Cross Selling"
+	},
+	{
+		"colname": "Issued Date",
+		"type": "STRING"
+	},
+	{
+		"colname": "Non-refundable Date",
+		"type": "STRING"
+	},
+	{
+		"colname": "Commission",
+		"type": "DECIMAL"
+	}
+]

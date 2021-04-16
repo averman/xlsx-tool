@@ -1,30 +1,29 @@
 [
     {
-        "colname": "Trip Type",
+        "colname": "Issue Date",
+        "serialDate": true,
         "source": [
-            "Trip Type"
+            "Issued Date"
+        ]
+    },
+    {
+        "colname": "Accounting Posting Date",
+        "serialDate": true,
+        "source": [
+            "Check Out Date"
         ]
     },
     {
         "colname": "Booking ID",
+        "filter": ".+",
         "source": [
             "Booking ID"
         ]
     },
     {
-        "colname": "Gross Commission",
+        "colname": "Provider Booking ID",
         "source": [
-            "Gross Commision",
-            "Actual Gross Commission (Inventory Currency)",
-            "Gross Commission (Inventory Currency)",
-            " Gross Commission (Inventory Currency) "
-        ]
-    },
-    {
-        "colname": "Published Rate",
-        "source": [
-            "Publish Rate (Inventory Currency)",
-            " Publish Rate (Inventory Currency) "
+            "N/A"
         ]
     },
     {
@@ -34,41 +33,34 @@
         ]
     },
     {
-        "colname": "Discount / Premium",
+        "colname": "Product Type",
         "source": [
-            "Discount/Premium",
-            "Discount/Premium (Collecting Currency)"
+            "Product Type"
         ]
     },
     {
-        "colname": "Unique Code",
+        "colname": "Fulfillment ID",
+        "filter": "^expedia.*",
         "source": [
-            "Unique Code",
-            "Unique Code (Collecting Currency)"
+            "Provider Id"
         ]
     },
     {
-        "colname": "Coupon Value",
+        "colname": "Contract Entity",
         "source": [
-            "Coupon Value (Collecting Currency)"
+            "Entity"
         ]
     },
     {
-        "colname": "Point Redemption",
+        "colname": "Contract Currency",
         "source": [
-            "Poin Redemption"
+            "Provider Currency"
         ]
     },
     {
-        "colname": "Issued Date",
+        "colname": "Commission Revenue",
         "source": [
-            "Booking Issue Date"
-        ]
-    },
-    {
-        "colname": "VAT OUT",
-        "source": [
-            "VAT OUT (Inventoy Currency)"
+            "Traveloka Commission"
         ]
     }
 ]

@@ -113,7 +113,10 @@ async function checkToken(token) {
 
 async function test(source, name, rulefile, datasetid, filterstring, sheetname){
     let rule = JSON.parse(fs.readFileSync(rulefile).toString());
+    let filters = rule.filter(x=>x.filter);
+    let doFilter = (r) => filters.map(x=>RegExp(x.filter).test(r[x.colname]))
     let token = await checkToken();
+    let stats = [['filename', 'row count', ...filters.map(x=>x.colname), 'final count']]
     console.log('Got DOMO token for 1 hour');
     if(!datasetid) {
         datasetid = await createDataset(name, rule, token);
@@ -135,6 +138,7 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
     let filter = filterRegex? x=>filterRegex.test(x) : x=>true;
     let globalPart = 0;
     for(let filename of files){
+        let stat = stats[0].map((x,i)=>i==0?filename:0);
         if(fs.lstatSync(path.join(source,filename)).isDirectory() ) continue;
         if(!filename.endsWith(".xlsx")) continue;
         if(!filter(filename)) continue;
@@ -152,8 +156,32 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
             let bulk = [];
             let count = 1;
             for(let i=0; i<data.length; i++){
+                stat[1]++;
                 let r = data[i];
-                bulk.push(rule.map(x=>x.serialdate?serialDate(r[x.colname]).toLocaleDateString():r[x.colname]));
+                let d = rule.map(x=>{
+                    let res;
+                    if(x.source) {
+                        for(let colMap of x.source) {
+                            if(colMap.startsWith("!")) {
+                                let scr = colMap.substr(1);
+                                res = eval(scr);
+                                break;
+                            }
+                            else if(typeof row[colMap] != "undefined") {
+                                res = row[colMap];
+                                break;
+                            }
+                        }
+                    } else {
+                        res = r[x.colname]
+                    }
+                    if(x.serialdate) return serialDate(res).toLocaleDateString()
+                });
+                let flags = doFilter(d);
+                stat = stat.map((x,i)=>i>2&&flags[i-2]?x[i]+1:x)
+                if(!flags.reduce((p,c)=>p&&c, true)) continue;
+                stat[stat.length-1]++;
+                bulk.push(d);
                 if(bulk.length>=10000 || i == data.length-1){   
                     let part = globalPart+count;
                     console.log("uploading part "+count+"/"+Math.ceil(data.length/10000)+" -- total-part "+part);
@@ -166,8 +194,9 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
             }
             globalPart = globalPart+count;
         }
+        stats.push(stat);
     }
-    console.log("committiong changes");
+    console.log("committing changes");
     await fetch(url+'/'+execId+"/commit", {
         method: 'PUT',
         headers: {
@@ -178,6 +207,7 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
         }).then(response => response.json())
         .then(console.log);
     console.log("finished upload to domo dataset with id ",datasetid);
+    fs.writeFileSync(stats.map(x=>x.join(",").join('\n')),'stats.csv');
 }
 
 async function putDataPart(url,execId, part,token,bulk) {
@@ -220,7 +250,7 @@ async function createDataset(name, rule, token){
             "updateMethod" : "APPEND"
           })
     }).then(response => response.json())
-    .then(json => {json.id});
+    .then(json => json.id);
 }
 
 async function getDomoToken(){

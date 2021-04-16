@@ -1,0 +1,26 @@
+[
+    {
+        "colname": "Entity",
+        "source": [
+            "Entity"
+        ]
+    },
+    {
+        "colname": "Product",
+        "source": [
+            "Product Type"
+        ]
+    },
+    {
+        "colname": "Vat",
+        "source": [
+            "VAT Amount"
+        ]
+    },
+    {
+        "colname": "Commission",
+        "source": [
+            "Traveloka Commission"
+        ]
+    }
+]
