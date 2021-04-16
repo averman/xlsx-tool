@@ -116,7 +116,7 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
     let filters = rule.map((x,i)=>[x,i]).filter(x=>x[0].filter);
     let doFilter = (r) => filters.map(x=>RegExp(x[0].filter).test(r[x[1]]))
     let token = await checkToken();
-    let stats = [['filename', 'row count', ...filters.map(x=>x.colname), 'final count']]
+    let stats = [['filename', 'row count', ...filters.map(x=>x[0].colname), 'final count']]
     console.log('Got DOMO token for 1 hour');
     if(!datasetid) {
         datasetid = await createDataset(name, rule, token);
@@ -179,7 +179,7 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
                     return res;
                 });
                 let flags = doFilter(d);
-                stat = stat.map((x,i)=>i>2&&flags[i-2]?x[i]+1:x)
+                stat = stat.map((x,i)=>i>2&&flags[i-2]?x+1:x)
                 if(!flags.reduce((p,c)=>p&&c, true)) continue;
                 stat[stat.length-1]++;
                 bulk.push(d);
