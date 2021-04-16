@@ -23,13 +23,7 @@
     {
         "colname": "Provider Booking ID",
         "source": [
-            "N/A"
-        ]
-    },
-    {
-        "colname": "Business Model",
-        "source": [
-            "Business Model"
+            "!'N/A'"
         ]
     },
     {

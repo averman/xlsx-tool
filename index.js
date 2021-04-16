@@ -157,7 +157,7 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
             let count = 1;
             for(let i=0; i<data.length; i++){
                 stat[1]++;
-                let r = data[i];
+                let row = data[i];
                 let d = rule.map(x=>{
                     let res;
                     if(x.source) {
@@ -173,9 +173,10 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
                             }
                         }
                     } else {
-                        res = r[x.colname]
+                        res = row[x.colname]
                     }
                     if(x.serialdate) return serialDate(res).toLocaleDateString()
+                    return res;
                 });
                 let flags = doFilter(d);
                 stat = stat.map((x,i)=>i>2&&flags[i-2]?x[i]+1:x)
@@ -207,7 +208,7 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
         }).then(response => response.json())
         .then(console.log);
     console.log("finished upload to domo dataset with id ",datasetid);
-    fs.writeFileSync(stats.map(x=>x.join(",").join('\n')),'stats.csv');
+    fs.writeFileSync(stats.map('stats.csv', x=>x.join(",")).join('\n'));
 }
 
 async function putDataPart(url,execId, part,token,bulk) {
