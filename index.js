@@ -113,8 +113,8 @@ async function checkToken(token) {
 
 async function test(source, name, rulefile, datasetid, filterstring, sheetname){
     let rule = JSON.parse(fs.readFileSync(rulefile).toString());
-    let filters = rule.filter(x=>x.filter);
-    let doFilter = (r) => filters.map(x=>RegExp(x.filter).test(r[x.colname]))
+    let filters = rule.map((x,i)=>[x,i]).filter(x=>x[0].filter);
+    let doFilter = (r) => filters.map(x=>RegExp(x[0].filter).test(r[x[1]]))
     let token = await checkToken();
     let stats = [['filename', 'row count', ...filters.map(x=>x.colname), 'final count']]
     console.log('Got DOMO token for 1 hour');
@@ -208,7 +208,7 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
         }).then(response => response.json())
         .then(console.log);
     console.log("finished upload to domo dataset with id ",datasetid);
-    fs.writeFileSync(stats.map('stats.csv', x=>x.join(",")).join('\n'));
+    fs.writeFileSync('stats.csv', stats.map(x=>x.join(",")).join('\n'));
 }
 
 async function putDataPart(url,execId, part,token,bulk) {
