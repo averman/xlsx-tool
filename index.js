@@ -179,13 +179,17 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
                     return res;
                 });
                 let flags = doFilter(d);
-                stat = stat.map((x,i)=>i>2&&flags[i-2]?x+1:x)
-                if(!flags.reduce((p,c)=>p&&c, true)) continue;
-                stat[stat.length-1]++;
-                bulk.push(d);
+                stat = stat.map((x,i)=>i>1&&flags[i-2]?x+1:x);
+                let flag = flags.reduce((p,c)=>p&&c, true);
+                if(!flag && (i<data.length-1)) continue;
+                if(flag){
+                    stat[stat.length-1]++;
+                    bulk.push(d);
+                }
                 if(bulk.length>=10000 || i == data.length-1){   
                     let part = globalPart+count;
-                    console.log("uploading part "+count+"/"+Math.ceil(data.length/10000)+" -- total-part "+part);
+                    let totalParts = i<data.length-1?(count+Math.ceil((data.length-i-1)/10000))+"?":count;
+                    console.log("uploading part "+count+"/"+totalParts+" -- total-part "+part);
                     token = await checkToken(token);
                     await putDataPart(url, execId, part, token, bulk);
                     bulk = [];
