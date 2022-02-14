@@ -191,6 +191,7 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
                     let totalParts = i<data.length-1?(count+Math.ceil((data.length-i-1)/10000))+"?":count;
                     console.log("uploading part "+count+"/"+totalParts+" -- total-part "+part);
                     token = await checkToken(token);
+                    console.log("token ok",(new Date()).toISOString())
                     await putDataPart(url, execId, part, token, bulk);
                     bulk = [];
                     if(i<data.length-1)
@@ -216,7 +217,8 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
 }
 
 async function putDataPart(url,execId, part,token,bulk) {
-    await fetch(url+'/'+execId+"/part/"+part, {
+    console.log("start uploading")
+    await Promise.race([fetch(url+'/'+execId+"/part/"+part, {
         method: 'PUT',
         headers: {
                 'Accept': 'application/json',
@@ -230,8 +232,14 @@ async function putDataPart(url,execId, part,token,bulk) {
         }).then(response => response.json()).catch(async err=>{
             console.log(err);
             await putDataPart(url,execId, part,token,bulk);
-        })
-        .then(console.log)
+        }),
+        new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('timeout')), 300000)
+        )
+    ]).catch(async err=>{
+        console.log(err);
+        await putDataPart(url,execId, part,token,bulk);})
+    .then(console.log)
 }
 
 async function createDataset(name, rule, token){
