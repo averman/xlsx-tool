@@ -7,6 +7,7 @@
 ## installation:
 
 `git clone`
+
 `npm install`
 
 ### usage:
