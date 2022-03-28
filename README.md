@@ -35,7 +35,7 @@ use --pk to define the primary key (unique row identifier) so that row with same
 
 #### upload
 
-`node index.js upload <xlsxfolderpath> <datasetname> <jsonschemafile>`
+`node index.js upload <sourcefolder> <datasetname> <mappingrule_json_file>`
 
 please make sure you have domo.key file in the same path as index.js with value
 ```
