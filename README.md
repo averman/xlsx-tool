@@ -33,6 +33,18 @@ merge all xlsx file in source folder to result file
 
 use --pk to define the primary key (unique row identifier) so that row with same value in that column will be merged as one, not defining the pk will make merge command only append rows
 
+#### upload
+
+`node index.js upload <xlsxfolderpath> <datasetname> <jsonschemafile>`
+
+please make sure you have domo.key file in the same path as index.js with value
+```
+{
+  "username": "",
+  "password": ""
+}
+```
+
 ### options:
 
 #### filter
@@ -40,3 +52,4 @@ use --pk to define the primary key (unique row identifier) so that row with same
 -f or --filter
 
 a regex string to filter the file to be processed
+
