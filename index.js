@@ -35,6 +35,11 @@ function serialDate(serial) {
     return new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate(), hours, minutes, seconds);
  }
 
+ function fixdate(dt) {
+     if(dt.toString().split('/').length==3) return dt;
+     else return serialDate(dt).toISOString().split('T')[0].split('-').reverse().join('/');
+ }
+
 yargs(hideBin(process.argv)).option('filter', {
     alias: 'f',
     type: 'regex',
@@ -163,9 +168,17 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
                     if(x.source) {
                         for(let colMap of x.source) {
                             if(colMap.startsWith("!")) {
-                                let scr = colMap.substr(1);
-                                res = eval(scr);
-                                break;
+                                try{
+                                    let scr = colMap.substr(1);
+                                    res = eval(scr);
+                                    break;
+                                }catch(e){
+                                    console.log(filename);
+                                    console.log(data);
+                                    console.log(colMap);
+                                    console.log(row);
+                                    throw e
+                                }
                             }
                             else if(typeof row[colMap] != "undefined") {
                                 res = row[colMap];
