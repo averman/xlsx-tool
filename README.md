@@ -35,6 +35,8 @@ use --pk to define the primary key (unique row identifier) so that row with same
 
 #### upload
 
+to upload xlsx to domo using this command:
+
 `node index.js upload <sourcefolder> <datasetname> <mappingrule_json_file>`
 
 please make sure you have domo.key file in the same path as index.js with value
@@ -44,6 +46,8 @@ please make sure you have domo.key file in the same path as index.js with value
   "password": ""
 }
 ```
+when you run this command, the domo dataset id will be printed, you can use this to append for another batch to the same dataset using option
+`--datasetid 123456`
 
 ### options:
 
