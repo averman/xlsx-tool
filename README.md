@@ -39,6 +39,8 @@ to upload xlsx to domo using this command:
 
 `node index.js upload <sourcefolder> <datasetname> <mappingrule_json_file>`
 
+mappingrule file is the same but for script, do use `row` instead of `rowsource`
+
 please make sure you have domo.key file in the same path as index.js with value
 ```
 {
