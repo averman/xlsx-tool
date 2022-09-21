@@ -7,6 +7,7 @@
 ## installation:
 
 `git clone`
+
 `npm install`
 
 ### usage:
@@ -35,15 +36,23 @@ use --pk to define the primary key (unique row identifier) so that row with same
 
 #### upload
 
+to upload xlsx to domo using this command:
+
 `node index.js upload <sourcefolder> <datasetname> <mappingrule_json_file>`
+
+mappingrule file is the same but for script, do use `row` instead of `rowres`
 
 please make sure you have domo.key file in the same path as index.js with value
 ```
 {
-  "username": "",
-  "password": ""
+  "username": "<client_id>",
+  "password": "<client_secret>"
 }
 ```
+if you don't have the key, create it at https://developer.domo.com/manage-clients
+
+when you run this command, the domo dataset id will be printed, you can use this to append for another batch to the same dataset using option
+`--datasetid 123456`
 
 ### options:
 
