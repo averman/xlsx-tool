@@ -118,7 +118,7 @@ async function checkToken(token) {
 }
 
 function escapeComma(str) {
-    str.indexOf(',')>-1?'"'+str+'"':str;
+    return str.indexOf(',')>-1?'"'+str+'"':str;
 }
 
 async function test(source, name, rulefile, datasetid, filterstring, sheetname){
