@@ -36,6 +36,7 @@ function serialDate(serial) {
  }
 
  function fixdate(dt) {
+     if(!dt) return dt;
      if(dt.toString().split('/').length==3) return dt;
      else return serialDate(dt).toISOString().split('T')[0].split('-').reverse().join('/');
  }
@@ -116,6 +117,10 @@ async function checkToken(token) {
     return token;
 }
 
+function escapeComma(str) {
+    str.indexOf(',')>-1?'"'+str+'"':str;
+}
+
 async function test(source, name, rulefile, datasetid, filterstring, sheetname){
     let rule = JSON.parse(fs.readFileSync(rulefile).toString());
     let filters = rule.map((x,i)=>[x,i]).filter(x=>x[0].filter);
@@ -189,7 +194,7 @@ async function test(source, name, rulefile, datasetid, filterstring, sheetname){
                         res = row[x.colname]
                     }
                     if(x.serialdate) return serialDate(res).toLocaleDateString()
-                    return res;
+                    return escapeComma(res);
                 });
                 let flags = doFilter(d);
                 stat = stat.map((x,i)=>i>1&&flags[i-2]?x+1:x);
@@ -276,7 +281,7 @@ async function createDataset(name, rule, token){
             "updateMethod" : "APPEND"
           })
     }).then(response => response.json())
-    .then(json => json.id);
+    .then(json => {console.log(json); return json.id});
 }
 
 async function getDomoToken(){
