@@ -281,7 +281,7 @@ async function createDataset(name, rule, token){
             "updateMethod" : "APPEND"
           })
     }).then(response => response.json())
-    .then(json => {console.log(json); return json.id});
+    .then(json => {return json.id});
 }
 
 async function getDomoToken(){
